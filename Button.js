@@ -37,6 +37,23 @@ var Button = React.createClass({
   statics: {
     isAndroid: (Platform.OS === 'android'),
   },
+  
+  _renderChildren: function() {
+    var childElements = [];
+      React.Children.forEach(this.props.children, (item) => {
+        if (typeof item === 'string') {
+          var element = (
+            <Text key={item} style={[styles.textButton, this.props.textStyle]}>
+            {item}
+            </Text>
+          );
+          childElements.push(element);
+        } else if (React.isValidElement(item)) {
+          childElements.push(item);
+        }
+      });
+    return (childElements);
+  },
 
   _renderInnerTextAndroid: function () {
     if (this.props.isLoading) {
@@ -50,11 +67,7 @@ var Button = React.createClass({
         />
       );
     }
-    return (
-      <Text style={[styles.textButton, this.props.textStyle]}>
-        {this.props.children}
-      </Text>
-    );
+    return this._renderChildren();
   },
 
   _renderInnerTextiOS: function () {
@@ -68,11 +81,7 @@ var Button = React.createClass({
         />
       );
     }
-    return (
-      <Text style={[styles.textButton, this.props.textStyle]}>
-        {this.props.children}
-      </Text>
-    );
+    return this._renderChildren();
   },
 
   _renderInnerText: function () {
