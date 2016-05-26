@@ -1,19 +1,24 @@
 'use strict';
 
-var React = require('react-native');
-var {
+const React = require('react');
+const {
+  PropTypes
+} = React;
+
+const {
   View,
   TouchableOpacity,
   Text,
   StyleSheet,
-  PropTypes,
   ActivityIndicatorIOS,
   ProgressBarAndroid,
   TouchableNativeFeedback,
   Platform
-} = React;
+} = require('react-native');
 
-var Button = React.createClass({
+const isEqual = require('lodash.isequal');
+
+const Button = React.createClass({
   propTypes: Object.assign({},
     {
       textStyle: Text.propTypes.style,
@@ -23,6 +28,8 @@ var Button = React.createClass({
         React.PropTypes.node,
         React.PropTypes.element
       ]),
+      activeOpacity: PropTypes.number,
+      allowFontScaling: PropTypes.bool,
       isLoading: PropTypes.bool,
       isDisabled: PropTypes.bool,
       activityIndicatorColor: PropTypes.string,
@@ -37,21 +44,21 @@ var Button = React.createClass({
   statics: {
     isAndroid: (Platform.OS === 'android'),
   },
-  
-  _renderChildren: function() {
+
+  _renderChildren: function () {
     var childElements = [];
-      React.Children.forEach(this.props.children, (item) => {
-        if (typeof item === 'string') {
-          var element = (
-            <Text key={item} style={[styles.textButton, this.props.textStyle]}>
+    React.Children.forEach(this.props.children, (item) => {
+      if (typeof item === 'string') {
+        var element = (
+          <Text key={item} style={[styles.textButton, this.props.textStyle]} allowFontScaling={this.props.allowFontScaling}>
             {item}
-            </Text>
-          );
-          childElements.push(element);
-        } else if (React.isValidElement(item)) {
-          childElements.push(item);
-        }
-      });
+          </Text>
+        );
+        childElements.push(element);
+      } else if (React.isValidElement(item)) {
+        childElements.push(item);
+      }
+    });
     return (childElements);
   },
 
@@ -64,7 +71,7 @@ var Button = React.createClass({
           }, styles.spinner]}
           styleAttr='Inverse'
           color={this.props.activityIndicatorColor || 'black'}
-        />
+          />
       );
     }
     return this._renderChildren();
@@ -78,10 +85,17 @@ var Button = React.createClass({
           size='small'
           style={styles.spinner}
           color={this.props.activityIndicatorColor || 'black'}
-        />
+          />
       );
     }
     return this._renderChildren();
+  },
+
+  shouldComponentUpdate: function (nextProps, nextState) {
+    if (!isEqual(nextProps, this.props)) {
+      return true;
+    }
+    return false;
   },
 
   _renderInnerText: function () {
@@ -95,16 +109,17 @@ var Button = React.createClass({
     if (this.props.isDisabled === true || this.props.isLoading === true) {
       return (
         <View style={[styles.button, this.props.style, (this.props.disabledStyle || styles.opacity)]}>
-          {this._renderInnerText()}
+          {this._renderInnerText() }
         </View>
       );
     } else {
       // Extract Touchable props
-      var touchableProps = {
+      let touchableProps = {
         onPress: this.props.onPress,
         onPressIn: this.props.onPressIn,
         onPressOut: this.props.onPressOut,
-        onLongPress: this.props.onLongPress
+        onLongPress: this.props.onLongPress,
+        activeOpacity: this.props.activeOpacity,
       };
       if (Button.isAndroid) {
         touchableProps = Object.assign(touchableProps, {
@@ -113,7 +128,7 @@ var Button = React.createClass({
         return (
           <TouchableNativeFeedback {...touchableProps}>
             <Text style={[styles.button, this.props.style]}>
-              {this._renderInnerTextAndroid()}
+              {this._renderInnerTextAndroid() }
             </Text>
           </TouchableNativeFeedback>
         )
@@ -121,7 +136,7 @@ var Button = React.createClass({
         return (
           <TouchableOpacity {...touchableProps}
             style={[styles.button, this.props.style]}>
-            {this._renderInnerTextiOS()}
+            {this._renderInnerTextiOS() }
           </TouchableOpacity>
         );
       }
@@ -129,7 +144,7 @@ var Button = React.createClass({
   }
 });
 
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   button: {
     height: 44,
     flexDirection: 'row',
