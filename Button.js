@@ -48,15 +48,16 @@ const Button = React.createClass({
   _renderChildren: function () {
     var childElements = [];
     React.Children.forEach(this.props.children, (item) => {
-      if (typeof item === 'string') {
+      if (React.isValidElement(item)) {
+        childElements.push(item);
+      } else if (item && item.toString) {
+        var itemStr = item.toString()
         var element = (
-          <Text key={item} style={[styles.textButton, this.props.textStyle]} allowFontScaling={this.props.allowFontScaling}>
-            {item}
+          <Text key={itemStr} style={[styles.textButton, this.props.textStyle]} allowFontScaling={this.props.allowFontScaling}>
+            {itemStr}
           </Text>
         );
         childElements.push(element);
-      } else if (React.isValidElement(item)) {
-        childElements.push(item);
       }
     });
     return (childElements);
